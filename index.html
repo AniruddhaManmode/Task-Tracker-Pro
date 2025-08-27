@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Tracker Pro</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .navbar {
+            background-color: #007bff;
+            color: white;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .title {
+            flex-grow: 1;
+            margin: 0;
+        }
+
+        .add-task-list {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .add-task-list:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .sidebar {
+            position: fixed;
+            left: -250px;
+            top: 0;
+            width: 250px;
+            height: 100%;
+            background: white;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            transition: left 0.3s;
+            z-index: 1000;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .calendar-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .calendar header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .calendar header button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            text-align: center;
+        }
+
+        .day,
+        .weekday {
+            padding: 6px;
+            position: relative;
+        }
+
+        .weekday {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .day {
+            background: #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .current-day {
+            background: #007bff !important;
+            color: white;
+            font-weight: bold;
+        }
+
+        .completed {
+            background-color: #28a745 !important;
+            color: white;
+        }
+
+        .uncompleted {
+            background-color: #dc3545 !important;
+            color: white;
+        }
+
+        .task-lists {
+            padding: 15px;
+        }
+
+        .task-list-item {
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+
+        .task-list-item:hover {
+            background: #f0f0f0;
+        }
+
+        .task-list-item.active {
+            background: #007bff;
+            color: white;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            display: none;
+            z-index: 999;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        #newTaskListModal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        #newTaskListModal .modal-content {
+            background: white;
+            margin: 20% auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        #taskListName {
+            width: 100%;
+            padding: 10px;
+            margin: 15px 0;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+
+        #taskModal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 350px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative;
+        }
+
+        #taskModalDate {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        #taskInput {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        #taskInput:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .modal-buttons button {
+            flex-grow: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-completed {
+            padding: 10px;
+            color: #f4f4f4;
+            background-color: #28a745;
+        }
+
+        .btn-completed:hover {
+            background-color: #218838;
+        }
+
+        .btn-uncompleted {
+            background-color: #dc3545;
+        }
+
+        .btn-uncompleted:hover {
+            background-color: #c82333;
+        }
+
+        .btn-cancel {
+            background-color: #6c757d;
+        }
+
+        .btn-cancel:hover {
+            background-color: #545b62;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: #333;
+        }
+
+        .task-counter {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-counter div {
+            text-align: center;
+        }
+
+        .task-counter span {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .task-counter .completed-count {
+            color: #28a745;
+        }
+
+        .task-counter .uncompleted-count {
+            color: #dc3545;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .modal-content {
+                margin: 25% auto;
+                width: 95%;
+                padding: 20px;
+            }
+
+            .modal-buttons {
+                flex-direction: column;
+            }
+
+            .modal-buttons button {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <button class="hamburger" onclick="toggleMenu()">☰</button>
+        <h1 class="title" id="currentListTitle">Task Tracker</h1>
+        <button class="add-task-list" onclick="openNewTaskListModal()">+ New Task</button>
+    </nav>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Your Task Lists</h2>
+            <button class="close-sidebar" onclick="toggleMenu()">&times;</button>
+        </div>
+        <div class="task-lists" id="taskLists"></div>
+    </div>
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <div class="calendar-container">
+        <div class="calendar">
+            <header>
+                <button onclick="prevMonth()">&#10094;</button>
+                <h2 id="month-year"></h2>
+                <button onclick="nextMonth()">&#10095;</button>
+            </header>
+            <div class="days">
+                <div class="weekday">Sun</div>
+                <div class="weekday">Mon</div>
+                <div class="weekday">Tue</div>
+                <div class="weekday">Wed</div>
+                <div class="weekday">Thu</div>
+                <div class="weekday">Fri</div>
+                <div class="weekday">Sat</div>
+            </div>
+            <div id="calendar-days" class="days"></div>
+        </div>
+        <div class="task-counter">
+            <div>
+                <span class="completed-count">0</span>
+                <div>Completed</div>
+            </div>
+            <div>
+                <span class="uncompleted-count">0</span>
+                <div>Uncompleted</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="taskModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeTaskModal()">&times;</span>
+            <h3 id="taskModalDate"></h3>
+            <div class="modal-buttons">
+                <button class="btn-completed" onclick="markTaskStatus(true)">Completed</button>
+                <button class="btn-uncompleted" onclick="markTaskStatus(false)">Not Completed</button>
+                <button class="btn-cancel" onclick="closeTaskModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="newTaskListModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeNewTaskListModal()">&times;</span>
+            <h3>New Task List</h3>
+            <input type="text" id="taskListName" placeholder="Enter list name">
+            <button class="btn-completed" onclick="createTaskList()">Create</button>
+        </div>
+    </div>
+
+    <script>
+        let taskLists = JSON.parse(localStorage.getItem('taskLists')) || [];
+        let currentTaskListId = null;
+        let currentDate = new Date();
+        let tasks = JSON.parse(localStorage.getItem('calendarTasks')) || {};
+
+
+        // Initialize default list if empty
+        if (taskLists.length === 0) {
+            const defaultList = {
+                id: generateId(),
+                name: 'Default List',
+                tasks: {}
+            };
+            taskLists.push(defaultList);
+            localStorage.setItem('taskLists', JSON.stringify(taskLists));
+        }
+        currentTaskListId = taskLists[0].id;
+
+        // Generate unique ID
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        // Toggle sidebar menu
+        function toggleMenu() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
+        }
+
+        // Render task lists in sidebar
+        function renderTaskLists() {
+            const container = document.getElementById('taskLists');
+            container.innerHTML = '';
+            taskLists.forEach(list => {
+                const div = document.createElement('div');
+                div.className = `task-list-item${list.id === currentTaskListId ? ' active' : ''}`;
+                div.textContent = list.name;
+                div.onclick = () => switchTaskList(list.id);
+                container.appendChild(div);
+            });
+            document.getElementById('currentListTitle').textContent =
+                taskLists.find(l => l.id === currentTaskListId).name;
+        }
+
+        // Switch between task lists
+        function switchTaskList(id) {
+            currentTaskListId = id;
+            renderCalendar();
+            renderTaskLists();
+            toggleMenu();
+        }
+
+        // New task list modal handling
+        function openNewTaskListModal() {
+            document.getElementById('newTaskListModal').style.display = 'block';
+        }
+
+        function closeNewTaskListModal() {
+            document.getElementById('newTaskListModal').style.display = 'none';
+        }
+
+        function createTaskList() {
+            const name = document.getElementById('taskListName').value;
+            if (!name) return;
+
+            const newList = {
+                id: generateId(),
+                name: name,
+                tasks: {}
+            };
+
+            taskLists.push(newList);
+            localStorage.setItem('taskLists', JSON.stringify(taskLists));
+            switchTaskList(newList.id);
+            closeNewTaskListModal();
+            document.getElementById('taskListName').value = '';
+        }
+
+        // Modified calendar functions
+        function getCurrentTasks() {
+            return taskLists.find(l => l.id === currentTaskListId).tasks;
+        }
+
+        function renderCalendar() {
+            const tasks = getCurrentTasks();
+            const monthYear = document.getElementById("month-year");
+            const daysContainer = document.getElementById("calendar-days");
+            daysContainer.innerHTML = "";
+
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const today = new Date().getDate();
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+
+            monthYear.innerText = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(currentDate);
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const lastDate = new Date(year, month + 1, 0).getDate();
+
+            for (let i = 0; i < firstDay; i++) {
+                const emptyCell = document.createElement("div");
+                emptyCell.classList.add("day");
+                emptyCell.style.background = "transparent";
+                daysContainer.appendChild(emptyCell);
+            }
+
+            for (let day = 1; day <= lastDate; day++) {
+                const dayCell = document.createElement("div");
+                dayCell.classList.add("day");
+                dayCell.innerText = day;
+
+                const key = `${year}-${month + 1}-${day}`;
+                if (tasks[key]) {
+                    dayCell.classList.add(tasks[key] === 'completed' ? 'completed' : 'uncompleted');
+                }
+
+                if (day === today && month === currentMonth && year === currentYear) {
+                    dayCell.classList.add("current-day");
+                }
+
+                dayCell.onclick = () => openTaskModal(year, month + 1, day);
+                daysContainer.appendChild(dayCell);
+            }
+
+            updateTaskCounter();
+        }
+
+        function openTaskModal(year, month, day) {
+            const modal = document.getElementById('taskModal');
+            const modalDate = document.getElementById('taskModalDate');
+            modalDate.innerText = `Task for ${month}/${day}/${year}`;
+            modal.style.display = 'block';
+            modal.currentDate = { year, month, day };
+        }
+
+        function closeTaskModal() {
+            document.getElementById('taskModal').style.display = 'none';
+        }
+
+        function markTaskStatus(isCompleted) {
+            const modal = document.getElementById('taskModal');
+            const { year, month, day } = modal.currentDate;
+            const key = `${year}-${month}-${day}`;
+
+            // Get the current task list's tasks
+            const currentTaskList = taskLists.find(list => list.id === currentTaskListId);
+            currentTaskList.tasks[key] = isCompleted ? 'completed' : 'uncompleted';
+
+            // Save to localStorage
+            localStorage.setItem('taskLists', JSON.stringify(taskLists));
+
+            // Close the modal and update the UI
+            closeTaskModal();
+            renderCalendar();
+            updateTaskCounter(); // Ensure the counter updates
+        }
+
+        function prevMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        }
+
+        function updateTaskCounter() {
+            const currentTaskList = taskLists.find(list => list.id === currentTaskListId);
+            const tasks = currentTaskList.tasks;
+
+            // Count completed and uncompleted tasks
+            const completedCount = Object.values(tasks).filter(status => status === 'completed').length;
+            const uncompletedCount = Object.values(tasks).filter(status => status === 'uncompleted').length;
+
+            // Update the UI
+            document.querySelector('.completed-count').textContent = completedCount;
+            document.querySelector('.uncompleted-count').textContent = uncompletedCount;
+        }
+
+        window.onclick = function (event) {
+            const modal = document.getElementById('taskModal');
+            if (event.target == modal) {
+                closeTaskModal();
+            }
+        }
+
+
+        // Initial render
+        renderTaskLists();
+        renderCalendar();
+    </script>
+</body>
+
+</html>

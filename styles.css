@@ -1,0 +1,184 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.calendar {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.calendar table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.calendar th, .calendar td {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+.calendar td {
+    cursor: pointer;
+    position: relative;
+}
+
+.calendar td:hover {
+    background-color: #f0f0f0;
+}
+
+.calendar td.selected {
+    background-color: #28a745;
+    color: white;
+}
+
+.calendar td.current-date {
+    border: 2px solid #007bff;
+    font-weight: bold;
+}
+
+.calendar td.has-tasks {
+    background-color: #28a745;
+    color: white;
+}
+
+.calendar td.empty {
+    background-color: #f9f9f9;
+    cursor: default;
+}
+
+.selected-date {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.task-list {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+}
+
+.task-category {
+    margin-bottom: 20px;
+}
+
+.task-category h3 {
+    margin-bottom: 10px;
+}
+
+.task-category ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.task-category li {
+    padding: 5px;
+    background-color: #f9f9f9;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.task-category li button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 2px 8px;
+    cursor: pointer;
+}
+
+.task-category input, .task-category textarea {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.task-category button {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.task-category button:hover {
+    background-color: #218838;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Add these styles to your existing CSS */
+.task-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-grow: 1;
+}
+
+.completed-task {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.calendar td.completed {
+    background-color: #28a745;
+    color: white;
+}
+
+.delete-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 2px 8px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.delete-btn:hover {
+    background-color: #c82333;
+}
+
+.task-category input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+}
+
+.task-category li {
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s;
+}
+
+.task-category li:hover {
+    background-color: #e9ecef;
+}
